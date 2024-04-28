@@ -1,6 +1,7 @@
 # Hexo Configuration
 ## Docs: https://hexo.io/docs/configuration.html
 ## Source: https://github.com/hexojs/hexo/
+ 
 
 # Site
 title: LittleBlackDot
@@ -106,6 +107,8 @@ theme: yilia
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
  type: git
- repo: git@8.129.64.61:/home/git/blog.git
+ repo:
+  github: git@github.com:littleblackdot/littleblackdot.github.io.git
+  gitee: git@gitee.com:littleblackdot/littleblackdot.git
 branch: master
 message:
