@@ -101,8 +101,22 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: yilia
-
+theme: next
+# 搜索
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
+# RSS订阅
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: ' '  
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
