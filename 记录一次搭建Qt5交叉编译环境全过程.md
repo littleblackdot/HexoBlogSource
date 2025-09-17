@@ -22,7 +22,7 @@ tags:
 
 - 当前系统版本
 
-  ![image-20250912145746868](记录一次搭建Qt5交叉编译环境全过程/osInfo.png)
+  ![osInfo](记录一次搭建Qt5交叉编译环境全过程/osInfo.png)
 
 ## 搭建目标机器环境
 
@@ -131,7 +131,7 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
   https://developer.arm.com/downloads/-/gnu-a
   ```
 
-  ![image-20250915141156689](记录一次搭建Qt5交叉编译环境全过程/downloadCrossCompiler.png)
+  ![downloadCrossCompiler](记录一次搭建Qt5交叉编译环境全过程/downloadCrossCompiler.png)
 
 - 确定目标机器的glibc版本和交叉编译器的glibc版本是否兼容
 
@@ -148,11 +148,11 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
 
   - 目标机器上的glibc版本
 
-      ![image-20250915142531493](记录一次搭建Qt5交叉编译环境全过程/glibcVerOfHost.png)
+      ![glibcVerOfHost](记录一次搭建Qt5交叉编译环境全过程/glibcVerOfHost.png)
 
   - gcc9.2交叉编译器的glibc版本
 
-    ![image-20250915142830400](记录一次搭建Qt5交叉编译环境全过程/glibcVerOfCompiler.png)
+    ![glibcVerOfCompiler](记录一次搭建Qt5交叉编译环境全过程/glibcVerOfCompiler.png)
 
   - 可以看到这里范围都是2.17--2.30，这个9.2版本的gcc应该是可以作为交叉编译器的版本的。而且选择9.2版本的gcc是因为目标机的gcc版本是9.3在arm官网上能找到和9.3最接近的版本就是9.2版本
 
@@ -287,11 +287,11 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
 
 
     - crt库查找失败
-
+    
       ![image-20250917104843605](记录一次搭建Qt5交叉编译环境全过程/configureErr1.png)
-
+    
       使用arm的gcc编译器好像就会出现这种问题，其只在sysroot的lib下查找crt文件、但是crt文件一般都是在lib/aarch64-linux-gnu 下的，所以需要在lib目录下创建crt文件的链接
-
+    
       ```
       #进入sysroot中
       cd /home/qtEnv/sysroot_aarch64/sophon
@@ -309,7 +309,7 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
 
 - configure执行成功后执行make等待编译结束然后make install
 
-![image-20250917105753520](记录一次搭建Qt5交叉编译环境全过程/confiureResult.png)
+![confiureResult](记录一次搭建Qt5交叉编译环境全过程/confiureResult.png)
 
 ```
 gmake -j6 #-j6指示使用多线程并行编译，缩短编译完成时间
