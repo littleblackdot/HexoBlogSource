@@ -2,6 +2,7 @@
 title: CSAPP笔记-链接
 date: 2024-04-28 22:25:47
 tags:
+mathjax: true
 ---
 
 &nbsp;
@@ -46,7 +47,7 @@ csapp有空会读一下，但是总是断断续续的再读，这样看完的东
 
 ### 可重定位目标文件
 
-<img src="/CSAPP笔记-链接/典型ELF可重定位目标文件.jpg" alt="典型的ELF可重定位目标文件结构" style="zoom:30%;" />
+<img src="CSAPP笔记-链接/典型ELF可重定位目标文件.jpg" alt="典型的ELF可重定位目标文件结构" style="zoom:30%;" />
 
 上图来自CSAPP，描述了一个ELF可重定位目标文件的结构。大致结构就是以一个ELF头开始，后跟许多“节”，最后跟着一个“节头部表”。每个“节”的大小和位置都是由节头部表描述的，每个节都拥有一个固定大小的条目。
 
@@ -59,7 +60,7 @@ csapp有空会读一下，但是总是断断续续的再读，这样看完的东
 
   - 用readelf解析elf头的例子
 
-    ![readelf解析ELF头](/CSAPP笔记-链接/ELF头解析实例.png)
+    ![readelf解析ELF头](CSAPP笔记-链接/ELF头解析实例.png)
 
 - 剩余各个“节”
 

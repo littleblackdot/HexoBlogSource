@@ -27,7 +27,9 @@ import (
 ```
 
 lengthConv是自己写的包，
+
 文件结构如下：
+
 ![文件结构](go包管理机制的一个小坑/1.png)
 
 百度了许久，改下 go env 中的 GO111MODULE 参数 设置为 auto（cmd命令：go env -w GO111MODULE=auto），问题解决，可以运行。但是vscode导包的地方有黄下划线提示有问题
