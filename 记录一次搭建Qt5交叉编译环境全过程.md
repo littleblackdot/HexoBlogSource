@@ -103,11 +103,12 @@ tags:
   我这里因为目标机是算能的设备所以sysyroot起名为sophon。加--copy-unsafe-links选项是因为单纯拷贝软连接可能会出现sysroot内符号链接失效问题，sysroot的可用性会变差，影响后续编译qt源码
 
 ```
-rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168.5.60:/usr/lib sophon/usr/
-rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168.5.60:/usr/include sophon/usr/
-rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168.5.60:/opt/sophon sophon/opt/sophon/	
-rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168.5.60:/usr/libexec sophon/usr/
-rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168.5.60:/usr/share sophon/usr/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/usr/lib sophon/usr/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/usr/include sophon/usr/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/opt/sophon sophon/opt/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/usr/libexec sophon/usr/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/usr/share sophon/usr/
+rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links  linaro@192.168.5.60:/usr/local sophon/usr/
 ```
 
 - 下载qt5源码
@@ -116,11 +117,11 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
   git clone https://code.qt.io/qt/qt5.git
   ```
 
-- 切换版本为5.1.5.10
+- 切换版本为5.15.10
 
   ```
   cd qt5
-  git checkout v5.8.0                                  # checking out the specific release or branch
+  git checkout v5.15.10-lts-lgpl                                 # checking out the specific release or 
   git submodule update --init --recursive              # updating each submodule to match the supermodule
   ```
 
@@ -166,7 +167,22 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
     ## 3.目标机器上执行hello，验证hello是否可用
     ```
 
-  
+- 确定目标机器的libc++版本和交叉编译器的libstdc++版本是否兼容
+
+  - 确定了glibc库的适配性，还要确定libstdc++的适配性，否则编译项目代码时还会出现GLIBCXX版本不兼容问题。
+  - 目标机器libstdc++的GLIBCXX版本
+    - ![image-20250926152305586](记录一次搭建Qt5交叉编译环境全过程/GLIBCXX_VersionOfLibstdc++InDevice.png)
+
+
+  - 很遗憾之前找的gcc-arm-9.2的libstdc++的GLICXX版本和目标机器的不适配（这个坑当没发现，遇到问题了一直想着使用sysroot的libstdc++但是加了各种编译选项都实现不了，搞了一两天，将sysroot下的libstdc++库覆盖到编译器路径下，可以编译通过，但是肯定不合适，只得换编译器了。）arm-gcc-9.2的libstdc++的GLICXX版本如下：
+
+    ![image-20250926154303045](记录一次搭建Qt5交叉编译环境全过程/libstdc++InArmGcc.png)
+
+- 好在arm的10.2版本的gcc工具链的libstdc++库和glibc库是能和设备上的匹配上的,最终使用arm gcc10.2版本的交叉编译工具
+
+  ![image-20250926154615061](记录一次搭建Qt5交叉编译环境全过程/ArmGcc10.2Libstdc++Info.png)
+
+  ![image-20250926154814041](记录一次搭建Qt5交叉编译环境全过程/glibcInfoInArmgcc10.2.png)
 
 ## 交叉编译Qt源码
 
@@ -193,7 +209,7 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
   include(../common/gcc-base-unix.conf)
   include(../common/g++-unix.conf)
   
-  QMAKE_LIBDIR_OPENGL_ES2 += $$[QT_SYSROOT]/usr/lib/aarch64-linux-gnu
+  QMAKE_LIBDIR_OPENGL_ES2 += $$[QT_SYSROOiT]/usr/lib/aarch64-linux-gnu
   QMAKE_INCDIR_OPENGL_ES2 += $$[QT_SYSROOT]/usr/include/
   QMAKE_LIBS_OPENGL_ES2  += -lGLESv2 -lEGL
   #QMAKE_LIBS_OPENGL_ES2  += -lGLESv2 -lEGL -lmali
@@ -236,16 +252,16 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
   
   
   # modifications to g++.conf
-  QMAKE_CC                = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
-  QMAKE_CXX               = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
-  QMAKE_LINK              = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
-  QMAKE_LINK_SHLIB        = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
+  QMAKE_CC                = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
+  QMAKE_CXX               = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
+  QMAKE_LINK              = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
+  QMAKE_LINK_SHLIB        = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
   
   # modifications to linux.conf
-  QMAKE_AR                = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-ar cqs
-  QMAKE_OBJCOPY           = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-objcopy
-  QMAKE_NM                = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-nm -P
-  QMAKE_STRIP             = /opt/crossCompiler/aarch64/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-strip
+  QMAKE_AR                = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-ar cqs
+  QMAKE_OBJCOPY           = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-objcopy
+  QMAKE_NM                = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-nm -P
+  QMAKE_STRIP             = /opt/crossCompiler/aarch64/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-strip
   load(qt_config)
   
   ```
@@ -259,7 +275,7 @@ rsync -avz --rsync-path="sudo rsync" --copy-unsafe-links --delete linaro@192.168
        -confirm-license \
        -sysroot /home/qtEnv/sysroot_aarch64/sophon  \          ##指定sysroot路径
        -xplatform linux-sophon-aarch64-gnu-g++ \				 ##指定使用的编译配置,用前面我们自定义的这个
-       -prefix /opt/qt/qt5/qt5.15.10-sophon-aarch64 \          ##编译后qt安装的位置
+       -prefix /opt/qt/qt5/qt5.15.10-gcc-arm-10.2-aarch64 \          ##编译后qt安装的位置
        -release \
        -nomake tests \
        -nomake examples \
